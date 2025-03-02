@@ -2,6 +2,7 @@
   "name": "onedrive-vercel-index",
   "version": "2.0.0",
   "private": true,
+  "packageManager": "pnpm@10.5.2",
   "engines": {
     "node": "22.x"
   },
