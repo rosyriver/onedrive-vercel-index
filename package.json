@@ -2,7 +2,7 @@
   "name": "onedrive-vercel-index",
   "version": "2.0.0",
   "private": true,
-  "packageManager": "pnpm@10.6.3",
+  "packageManager": "pnpm@10.6.4",
   "engines": {
     "node": "22.x"
   },
@@ -68,11 +68,11 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "autoprefixer": "^10.4.21",
     "eslint": "9.22.0",
-    "eslint-config-next": "15.2.2",
+    "eslint-config-next": "15.2.3",
     "eslint-config-prettier": "^10.1.1",
     "i18next": "^24.2.3",
     "i18next-parser": "^9.3.0",
-    "next": "^15.2.2",
+    "next": "^15.2.3",
     "next-i18next": "^15.4.2",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
