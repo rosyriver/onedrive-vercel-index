@@ -34,9 +34,6 @@ importers:
       '@tailwindcss/line-clamp':
         specifier: ^0.4.4
         version: 0.4.4(tailwindcss@3.4.17)
-      '@types/lodash':
-        specifier: ^4.17.16
-        version: 4.17.16
       awesome-debounce-promise:
         specifier: ^2.1.0
         version: 2.1.0
@@ -761,9 +758,6 @@ packages:
   '@types/localforage@0.0.34':
     resolution: {integrity: sha512-tJxahnjm9dEI1X+hQSC5f2BSd/coZaqbIl1m3TCl0q9SVuC52XcXfV0XmoCU1+PmjyucuVITwoTnN8OlTbEXXA==}
     deprecated: This is a stub types definition for localforage (https://github.com/localForage/localForage). localforage provides its own type definitions, so you don't need @types/localforage installed!
-
-  '@types/lodash@4.17.16':
-    resolution: {integrity: sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==}
 
   '@types/mdast@3.0.15':
     resolution: {integrity: sha512-LnwD+mUEfxWMa1QpDraczIn6k0Ee3SMicuYSSzS6ZYl2gKS09EClnJYGd8Du6rfc5r/GZEk5o1mRb8TaTj03sQ==}
@@ -4100,8 +4094,6 @@ snapshots:
   '@types/localforage@0.0.34':
     dependencies:
       localforage: 1.10.0
-
-  '@types/lodash@4.17.16': {}
 
   '@types/mdast@3.0.15':
     dependencies:
