@@ -13,7 +13,7 @@ import { getAccessToken } from '../api'
 
 export async function getServerSideProps({ locale }) {
   const clientId = process.env.CLIENT_ID || '';
-  const clientSecret = process.env.SECRET_KEY || '';
+  const clientSecret = process.env.CLIENT_SECRET || '';
   // Get accessToken using getAccessToken function
   const accessToken = await getAccessToken();
   // If the accessToken exists, redirect to the home page
@@ -103,7 +103,7 @@ export default function OAuthStep1({ clientId, clientSecret }) {
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
                     <td className="bg-gray-50 py-1 px-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-400">
-                      SECRET_KEY*
+                      CLIENT_SECRET*
                     </td>
                     <td className="whitespace-nowrap py-1 px-3 text-gray-500 dark:text-gray-400">
                       <code className="font-mono text-sm">{clientSecret}</code>

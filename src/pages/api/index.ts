@@ -12,7 +12,7 @@ import { runCorsMiddleware } from './raw'
 
 const basePath = pathPosix.resolve('/', process.env.BASE_DIRECTORY || '/')
 const clientId = process.env.CLIENT_ID || ''
-const clientSecret = revealObfuscatedToken(process.env.SECRET_KEY || '')
+const clientSecret = revealObfuscatedToken(process.env.CLIENT_SECRET || '')
 
 /**
  * Encode the path of the file relative to the base directory
@@ -53,7 +53,7 @@ export async function getAccessToken(): Promise<string> {
   const body = new URLSearchParams()
   body.append('client_id', clientId)
   body.append('redirect_uri', apiConfig.redirectUri)
-  body.append('secret_key', clientSecret)
+  body.append('client_secret', clientSecret)
   body.append('refresh_token', refreshToken)
   body.append('grant_type', 'refresh_token')
 
