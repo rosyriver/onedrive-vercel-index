@@ -1,7 +1,4 @@
 {
-    "github": {
-        "silent": true
-    },
-    "buildCommand": "pnpm build",
-    "installCommand": "pnpm install"
-}
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install"
+} 
