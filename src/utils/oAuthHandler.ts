@@ -68,7 +68,7 @@ export async function requestTokenWithAuthCode(code: string, config: any): Promi
     const params = new URLSearchParams()
     params.append('client_id', clientId)
     params.append('redirect_uri', redirectUri)
-    params.append('client_secret', clientSecret)
+    params.append('secret_key', clientSecret)
     params.append('code', code)
     params.append('grant_type', 'authorization_code')
 
