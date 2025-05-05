@@ -11,27 +11,6 @@ import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import { LoadingIcon } from '../../components/Loading'
 import { extractAuthCodeFromRedirected, generateAuthorisationUrl } from '../../utils/oAuthHandler'
-import { getAccessToken } from '../api'
-
-export async function getServerSideProps({ locale }) {
-  // Get accessToken using getAccessToken function
-  const accessToken = await getAccessToken();
-  // If the accessToken exists, redirect to the home page
-  if (accessToken) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    }
-  }
-  // If the accessToken does not exist, render the page normally
-  return {
-    props: {
-      ...(await serverSideTranslations(locale, ['common'])),
-    },
-  }
-}
 
 export default function OAuthStep2() {
   const router = useRouter()
@@ -80,9 +59,7 @@ export default function OAuthStep2() {
             <div
               className="relative my-2 cursor-pointer rounded border border-gray-500/50 bg-gray-50 font-mono text-sm hover:opacity-80 dark:bg-gray-800"
               onClick={() => {
-                if (oAuthUrl) {
-                  window.open(oAuthUrl)
-                }
+                window.open(oAuthUrl)
               }}
             >
               <div className="absolute top-0 right-0 p-1 opacity-60">
@@ -162,4 +139,12 @@ export default function OAuthStep2() {
       <Footer />
     </div>
   )
+}
+
+export async function getServerSideProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  }
 }
