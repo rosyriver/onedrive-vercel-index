@@ -18,7 +18,7 @@ export function revealObfuscatedToken(obfuscated: string): string {
 }
 
 // Generate the Microsoft OAuth 2.0 authorization URL, used for requesting the authorisation code
-export function generateAuthorisationUrl(): string {
+export async function generateAuthorisationUrl(): Promise<string> {
   const { clientId, redirectUri, authApi, scope } = apiConfig
   const authUrl = authApi.replace('/token', '/authorize')
 
@@ -49,9 +49,7 @@ export function extractAuthCodeFromRedirected(url: string): string {
 // After a successful authorisation, the code returned from the Microsoft OAuth 2.0 authorization URL
 // will be used to request an access token. This function requests the access token with the authorisation code
 // and returns the access token and refresh token on success.
-export async function requestTokenWithAuthCode(
-  code: string
-): Promise<
+export async function requestTokenWithAuthCode(code: string, config: any): Promise<
   | { expiryTime: string; accessToken: string; refreshToken: string }
   | { error: string; errorDescription: string; errorUri: string }
 > {
