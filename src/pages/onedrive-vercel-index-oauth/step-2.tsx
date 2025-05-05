@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation, Trans } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -42,13 +42,7 @@ export default function OAuthStep2() {
 
   const { t } = useTranslation()
 
-  // const oAuthUrl = generateAuthorisationUrl()
-
-  const [oAuthUrl, setOAuthUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    generateAuthorisationUrl().then(url => setOAuthUrl(url))
-  }, [])
+  const oAuthUrl = generateAuthorisationUrl()
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-gray-900">
