@@ -3,11 +3,6 @@ import CryptoJS from 'crypto-js'
 
 import apiConfig from '../../config/api.config'
 
-async function getConfig() {
-  const res = await axios.get('../../config/api.config')
-  return res.data
-}
-
 // Just a disguise to obfuscate required tokens (including but not limited to client secret,
 // access tokens, and refresh tokens), used along with the following two functions
 const AES_SECRET_KEY = 'onedrive-vercel-index'
@@ -23,9 +18,8 @@ export function revealObfuscatedToken(obfuscated: string): string {
 }
 
 // Generate the Microsoft OAuth 2.0 authorization URL, used for requesting the authorisation code
-export async function generateAuthorisationUrl(): Promise<string> {
-  const { clientId } = await getConfig() 
-  const { redirectUri, authApi, scope } = apiConfig
+export function generateAuthorisationUrl(): string {
+  const { clientId, redirectUri, authApi, scope } = apiConfig
   const authUrl = authApi.replace('/token', '/authorize')
 
   // Construct URL parameters for OAuth2
@@ -55,22 +49,22 @@ export function extractAuthCodeFromRedirected(url: string): string {
 // After a successful authorisation, the code returned from the Microsoft OAuth 2.0 authorization URL
 // will be used to request an access token. This function requests the access token with the authorisation code
 // and returns the access token and refresh token on success.
-export async function requestTokenWithAuthCode(code: string, config: any): Promise<
+export async function requestTokenWithAuthCode(
+  code: string
+): Promise<
   | { expiryTime: string; accessToken: string; refreshToken: string }
   | { error: string; errorDescription: string; errorUri: string }
 > {
-  try {
-    const clientId = apiConfig.clientId
-    const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
-    const { redirectUri, authApi } = apiConfig
+  const { clientId, redirectUri, authApi } = apiConfig
+  const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
 
-    // Construct URL parameters for OAuth2
-    const params = new URLSearchParams()
-    params.append('client_id', clientId)
-    params.append('redirect_uri', redirectUri)
-    params.append('client_secret', clientSecret)
-    params.append('code', code)
-    params.append('grant_type', 'authorization_code')
+  // Construct URL parameters for OAuth2
+  const params = new URLSearchParams()
+  params.append('client_id', clientId)
+  params.append('redirect_uri', redirectUri)
+  params.append('client_secret', clientSecret)
+  params.append('code', code)
+  params.append('grant_type', 'authorization_code')
 
   // Request access token
   return axios
