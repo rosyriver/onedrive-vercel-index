@@ -3,6 +3,11 @@ import CryptoJS from 'crypto-js'
 
 import apiConfig from '../../config/api.config'
 
+async function getConfig() {
+  const res = await axios.get('../../config/api.config')
+  return res.data
+}
+
 // Just a disguise to obfuscate required tokens (including but not limited to client secret,
 // access tokens, and refresh tokens), used along with the following two functions
 const AES_SECRET_KEY = 'onedrive-vercel-index'
@@ -19,7 +24,8 @@ export function revealObfuscatedToken(obfuscated: string): string {
 
 // Generate the Microsoft OAuth 2.0 authorization URL, used for requesting the authorisation code
 export async function generateAuthorisationUrl(): Promise<string> {
-  const { clientId, redirectUri, authApi, scope } = apiConfig
+  const { clientId } = await getConfig() 
+  const { redirectUri, authApi, scope } = apiConfig
   const authUrl = authApi.replace('/token', '/authorize')
 
   // Construct URL parameters for OAuth2
@@ -53,8 +59,10 @@ export async function requestTokenWithAuthCode(code: string, config: any): Promi
   | { expiryTime: string; accessToken: string; refreshToken: string }
   | { error: string; errorDescription: string; errorUri: string }
 > {
-  const { clientId, redirectUri, authApi } = apiConfig
+  try {
+    const clientId = apiConfig.clientId
   const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
+    const { redirectUri, authApi } = apiConfig
 
   // Construct URL parameters for OAuth2
   const params = new URLSearchParams()

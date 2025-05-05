@@ -11,7 +11,7 @@ import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import { LoadingIcon } from '../../components/Loading'
 import { extractAuthCodeFromRedirected, generateAuthorisationUrl } from '../../utils/oAuthHandler'
-import { getAccessToken } from '../api'
+import { getAccessToken } from '../../../config'
 
 export async function getServerSideProps({ locale }) {
   // Get accessToken using getAccessToken function
