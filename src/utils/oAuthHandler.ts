@@ -61,16 +61,16 @@ export async function requestTokenWithAuthCode(code: string, config: any): Promi
 > {
   try {
     const clientId = apiConfig.clientId
-  const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
+    const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
     const { redirectUri, authApi } = apiConfig
 
-  // Construct URL parameters for OAuth2
-  const params = new URLSearchParams()
-  params.append('client_id', clientId)
-  params.append('redirect_uri', redirectUri)
-  params.append('client_secret', clientSecret)
-  params.append('code', code)
-  params.append('grant_type', 'authorization_code')
+    // Construct URL parameters for OAuth2
+    const params = new URLSearchParams()
+    params.append('client_id', clientId)
+    params.append('redirect_uri', redirectUri)
+    params.append('client_secret', clientSecret)
+    params.append('code', code)
+    params.append('grant_type', 'authorization_code')
 
   // Request access token
   return axios
