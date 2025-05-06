@@ -12,8 +12,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getAccessToken } from '../api'
 
 export async function getServerSideProps({ locale }) {
-  const clientId = apiConfig.clientId
-  const clientSecret = apiConfig.obfuscatedClientSecret
+  const clientId = apiConfig.clientId;
+  const clientSecret = apiConfig.obfuscatedClientSecret;
   // Get accessToken using getAccessToken function
   const accessToken = await getAccessToken();
   // If the accessToken exists, redirect to the home page
