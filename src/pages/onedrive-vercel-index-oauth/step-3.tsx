@@ -7,6 +7,7 @@ import { useTranslation, Trans } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import siteConfig from '../../../config/site.config'
+import apiConfig from '../../../config/api.config'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 
@@ -16,9 +17,9 @@ import { getAccessToken } from '../api'
 
 export async function getServerSideProps({ query, locale }) {
   const { authCode } = query
-  const clientId = process.env.CLIENT_ID || '';
-  const clientSecret = process.env.CLIENT_SECRET || '';
-  const userPrincipalName = process.env.USER_PRINCIPAL_NAME || '';
+  const clientId = apiConfig.clientId
+  const clientSecret = apiConfig.obfuscatedClientSecret
+  const userPrincipalName = siteConfig.userPrincipalName
   
   // Check if OAuth authentication has been completed
   const existingAccessToken = await getAccessToken();
