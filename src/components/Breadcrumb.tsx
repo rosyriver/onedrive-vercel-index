@@ -27,7 +27,7 @@ const Breadcrumb: React.FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
             .slice(0)
             .reverse()
             .map((p: string, i: number) => (
-              <li key={i} className="flex flex-shrink-0 items-center">
+              <li key={i} className="flex shrink-0 items-center">
                 <FontAwesomeIcon className="h-3 w-3" icon="angle-right" />
                 <Link
                   href={`/${path
@@ -43,7 +43,7 @@ const Breadcrumb: React.FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
                 </Link>
               </li>
             ))}
-          <li className="flex-shrink-0 transition-all duration-75 hover:opacity-80">
+          <li className="shrink-0 transition-all duration-75 hover:opacity-80">
             <HomeCrumb />
           </li>
         </ol>

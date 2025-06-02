@@ -186,7 +186,7 @@ export default function OAuthStep3({ userPrincipalName, accessToken, expiryTime,
                     })}
                   </span>
                 </p>
-                <p className="my-2 whitespace-pre-line rounded border border-gray-400/20 bg-gray-50 p-2 font-mono text-sm opacity-80 dark:bg-gray-800">
+                <p className="my-2 whitespace-pre-line rounded-sm border border-gray-400/20 bg-gray-50 p-2 font-mono text-sm opacity-80 dark:bg-gray-800">
                   {
                     // t('Where is the auth code? Did you follow step 2 you silly donut?')
                     t(description)
@@ -211,7 +211,7 @@ export default function OAuthStep3({ userPrincipalName, accessToken, expiryTime,
                 )}
                 <div className="mb-2 mt-6 text-right">
                   <button
-                    className="rounded-lg bg-gradient-to-br from-red-500 to-orange-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-red-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-red-800"
+                    className="rounded-lg bg-linear-to-br from-red-500 to-orange-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-linear-to-bl focus:ring-4 focus:ring-red-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-red-800"
                     onClick={() => {
                       router.push('/onedrive-vercel-index-oauth/step-1')
                     }}
@@ -265,7 +265,7 @@ export default function OAuthStep3({ userPrincipalName, accessToken, expiryTime,
 
                 <div className="mb-2 mt-6 text-right">
                   <button
-                    className={`rounded-lg bg-gradient-to-br px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 ${
+                    className={`rounded-lg bg-linear-to-br px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-linear-to-bl focus:ring-4 ${
                       buttonError
                         ? 'from-red-500 to-orange-400 focus:ring-red-200 dark:focus:ring-red-800'
                         : 'from-green-500 to-teal-300 focus:ring-green-200 dark:focus:ring-green-800'

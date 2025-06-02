@@ -17,9 +17,9 @@ const SwitchLayout = () => {
   const { t } = useTranslation()
 
   return (
-    <div className="relative w-24 flex-shrink-0 text-sm text-gray-600 dark:text-gray-300 md:w-28">
+    <div className="relative w-24 shrink-0 text-sm text-gray-600 dark:text-gray-300 md:w-28">
       <Listbox value={preferredLayout} onChange={setPreferredLayout}>
-        <Listbox.Button className="relative w-full cursor-pointer rounded pl-4">
+        <Listbox.Button className="relative w-full cursor-pointer rounded-sm pl-4">
           <span className="pointer-events-none flex items-center">
             <FontAwesomeIcon className="mr-2 h-3 w-3" icon={preferredLayout.icon} />
             <span>
@@ -44,7 +44,7 @@ const SwitchLayout = () => {
           leaveFrom="transform scale-100 opacity-100"
           leaveTo="transform scale-95 opacity-0"
         >
-          <Listbox.Options className="absolute right-0 z-20 mt-1 w-32 overflow-auto rounded border border-gray-900/10 bg-white py-1 shadow-lg focus:outline-none dark:border-gray-500/30 dark:bg-gray-800">
+          <Listbox.Options className="absolute right-0 z-20 mt-1 w-32 overflow-auto rounded-sm border border-gray-900/10 bg-white py-1 shadow-lg focus:outline-hidden dark:border-gray-500/30 dark:bg-gray-800">
             {layouts.map(layout => (
               <Listbox.Option
                 key={layout.id}

@@ -58,7 +58,7 @@ const Navbar = () => {
   }
 
   return (
-    <div className="sticky top-0 z-[100] border-b border-gray-900/10 bg-white bg-opacity-80 backdrop-blur-md dark:border-gray-500/30 dark:bg-gray-900">
+    <div className="sticky top-0 z-100 border-b border-gray-900/10 bg-white bg-opacity-80 backdrop-blur-md dark:border-gray-500/30 dark:bg-gray-900">
       <Toaster />
 
       <SearchModal searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
@@ -178,13 +178,13 @@ const Navbar = () => {
 
                 <div className="mt-8 flex items-center justify-end">
                   <button
-                    className="mr-3 inline-flex items-center justify-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300"
+                    className="mr-3 inline-flex items-center justify-center space-x-2 rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-400 focus:outline-hidden focus:ring-3 focus:ring-blue-300"
                     onClick={() => setIsOpen(false)}
                   >
                     {t('Cancel')}
                   </button>
                   <button
-                    className="inline-flex items-center justify-center space-x-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-400 focus:outline-none focus:ring focus:ring-red-300"
+                    className="inline-flex items-center justify-center space-x-2 rounded-sm bg-red-500 px-4 py-2 text-white hover:bg-red-400 focus:outline-hidden focus:ring-3 focus:ring-red-300"
                     onClick={() => clearTokens()}
                   >
                     <FontAwesomeIcon icon={['far', 'trash-alt']} />

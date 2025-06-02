@@ -84,7 +84,7 @@ export default function OAuthStep2() {
             </p>
 
             <div
-              className="relative my-2 cursor-pointer rounded border border-gray-500/50 bg-gray-50 font-mono text-sm hover:opacity-80 dark:bg-gray-800"
+              className="relative my-2 cursor-pointer rounded-sm border border-gray-500/50 bg-gray-50 font-mono text-sm hover:opacity-80 dark:bg-gray-800"
               onClick={() => {
                 if (oAuthUrl) {
                   window.open(oAuthUrl)
@@ -110,12 +110,12 @@ export default function OAuthStep2() {
               </Trans>
             </p>
 
-            <div className="my-4 mx-auto w-2/3 overflow-hidden rounded">
+            <div className="my-4 mx-auto w-2/3 overflow-hidden rounded-sm">
               <Image src="/images/step-2-screenshot.png" width={1466} height={607} alt="step 2 screenshot" />
             </div>
 
             <input
-              className={`my-2 w-full flex-1 rounded border bg-gray-50 p-2 font-mono text-sm font-medium focus:outline-none focus:ring dark:bg-gray-800 dark:text-white ${
+              className={`my-2 w-full flex-1 rounded border bg-gray-50 p-2 font-mono text-sm font-medium focus:outline-hidden focus:ring-3 dark:bg-gray-800 dark:text-white ${
                 authCode
                   ? 'border-green-500/50 focus:ring-green-500/30 dark:focus:ring-green-500/40'
                   : 'border-red-500/50 focus:ring-red-500/30 dark:focus:ring-red-500/40'
@@ -131,7 +131,7 @@ export default function OAuthStep2() {
             />
 
             <p className="py-1">{t('The authorisation code extracted is:')}</p>
-            <p className="my-2 overflow-hidden truncate rounded border border-gray-400/20 bg-gray-50 p-2 font-mono text-sm opacity-80 dark:bg-gray-800">
+            <p className="my-2 overflow-hidden truncate rounded-sm border border-gray-400/20 bg-gray-50 p-2 font-mono text-sm opacity-80 dark:bg-gray-800">
               {authCode ?? <span className="animate-pulse">{t('Waiting for code...')}</span>}
             </p>
 
@@ -143,7 +143,7 @@ export default function OAuthStep2() {
 
             <div className="mb-2 mt-6 text-right">
               <button
-                className="rounded-lg bg-gradient-to-br from-green-500 to-cyan-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-green-800"
+                className="rounded-lg bg-linear-to-br from-green-500 to-cyan-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-linear-to-bl focus:ring-4 focus:ring-green-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-green-800"
                 disabled={authCode === ''}
                 onClick={() => {
                   setButtonLoading(true)
