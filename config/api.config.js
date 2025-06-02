@@ -10,7 +10,7 @@
 module.exports = {
   // The clientId and clientSecret are used to authenticate the user with Microsoft Graph API using OAuth. You would
   // not need to change anything here if you can authenticate with your personal Microsoft account with OneDrive International.
-  // and You MUST add CLIEND_ID & SECRET_KEY in your VERCEL Project's Setting: Environment Variables Key & Value
+  // You MUST add CLIEND_ID & SECRET_KEY in YOUT Vercel Project's Setting: Environment Variables (Key & Value)
   clientId: process.env.CLIENT_ID  || '',
   obfuscatedClientSecret: process.env.SECRET_KEY  || '',
 
