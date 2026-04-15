@@ -6,25 +6,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation, Trans } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import apiConfig from '../../../config/api.config'
 import siteConfig from '../../../config/site.config'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 
-import { getAuthPersonInfo, requestTokenWithAuthCode, sendTokenToServer } from '../../utils/oAuthHandler'
+import { sendTokenToServer } from '../../utils/oAuthClient'
 import { LoadingIcon } from '../../components/Loading'
 import { getAccessToken } from '../api'
 
 export async function getServerSideProps({ query, locale }) {
+  const { requestTokenWithAuthCode } = await import('../../utils/oAuthHandler')
   const { authCode } = query
-  const clientId = apiConfig.clientId;
-  const clientSecret = apiConfig.obfuscatedClientSecret;
-  const userPrincipalName = siteConfig.userPrincipalName;
-  
+
   // Check if OAuth authentication has been completed
-  const existingAccessToken = await getAccessToken();
+  const existingAccessToken = await getAccessToken()
   if (existingAccessToken) {
-  // If OAuth authentication has been completed, redirect to the homepage
+    // If OAuth authentication has been completed, redirect to the homepage
     return {
       redirect: {
         destination: '/',
@@ -39,14 +36,19 @@ export async function getServerSideProps({ query, locale }) {
         error: 'No auth code present',
         description: 'Where is the auth code? Did you follow step 2 you silly donut?',
         ...(await serverSideTranslations(locale, ['common'])),
-        clientId,
-        clientSecret,
-        userPrincipalName,
       },
     }
   }
-  const config = { clientId, clientSecret, userPrincipalName };
-  const response = await requestTokenWithAuthCode(authCode, config)
+  if (typeof authCode !== 'string') {
+    return {
+      props: {
+        error: 'Invalid auth code',
+        description: 'Auth code must be a single value.',
+        ...(await serverSideTranslations(locale, ['common'])),
+      },
+    }
+  }
+  const response = await requestTokenWithAuthCode(authCode)
 
   // If error response, return invalid
   if ('error' in response) {
@@ -64,9 +66,6 @@ export async function getServerSideProps({ query, locale }) {
 
   return {
     props: {
-      clientId,
-      clientSecret,
-      userPrincipalName,
       error: null,
       expiryTime,
       accessToken,
@@ -76,7 +75,7 @@ export async function getServerSideProps({ query, locale }) {
   }
 }
 
-export default function OAuthStep3({ userPrincipalName, accessToken, expiryTime, refreshToken, error, description, errorUri }) {
+export default function OAuthStep3({ accessToken, expiryTime, refreshToken, error, description, errorUri }) {
   const router = useRouter()
   const [expiryTimeLeft, setExpiryTimeLeft] = useState(expiryTime)
 
@@ -107,27 +106,6 @@ export default function OAuthStep3({ userPrincipalName, accessToken, expiryTime,
       </div>
     )
 
-    // verify identity of the authenticated user with the Microsoft Graph API
-    const { data, status } = await getAuthPersonInfo(accessToken)
-    if (status !== 200) {
-      setButtonError(true)
-      setButtonContent(
-        <div>
-          <span>{t('Error validating identify, restart')}</span> <FontAwesomeIcon icon="exclamation-circle" />
-        </div>
-      )
-      return
-    }
-    if (data.userPrincipalName !== userPrincipalName) {
-      setButtonError(true)
-      setButtonContent(
-        <div>
-          <span>{t('Do not pretend to be the site owner')}</span> <FontAwesomeIcon icon="exclamation-circle" />
-        </div>
-      )
-      return
-    }
-
     await sendTokenToServer(accessToken, refreshToken, expiryTime)
       .then(() => {
         setButtonError(false)
@@ -140,11 +118,15 @@ export default function OAuthStep3({ userPrincipalName, accessToken, expiryTime,
           router.push('/')
         }, 2000)
       })
-      .catch(_ => {
+      .catch(error => {
+        const status = error?.response?.status
+        const buttonText =
+          status === 403 ? t('Do not pretend to be the site owner') : t('Error storing the token')
+
         setButtonError(true)
         setButtonContent(
           <div>
-            <span>{t('Error storing the token')}</span> <FontAwesomeIcon icon="exclamation-circle" />
+            <span>{buttonText}</span> <FontAwesomeIcon icon="exclamation-circle" />
           </div>
         )
       })

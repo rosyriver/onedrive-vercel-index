@@ -3,5 +3,11 @@
         "silent": true
     },
     "buildCommand": "pnpm build",
-    "installCommand": "pnpm install"
+    "installCommand": "pnpm install",
+    "crons": [
+        {
+            "path": "/api/refresh-auth",
+            "schedule": "0 0 * * *"
+        }
+    ]
 }

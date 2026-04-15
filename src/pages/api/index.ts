@@ -5,14 +5,22 @@ import axios from 'axios'
 
 import apiConfig from '../../../config/api.config'
 import siteConfig from '../../../config/site.config'
-import { revealObfuscatedToken } from '../../utils/oAuthHandler'
+import { getAuthPersonInfo, revealObfuscatedToken } from '../../utils/oAuthHandler'
 import { compareHashedToken } from '../../utils/protectedRouteHandler'
-import { getOdAuthTokens, storeOdAuthTokens } from '../../utils/odAuthTokenStore'
+import { clearOdAuthTokens, getOdAuthTokens, storeOdAuthTokens } from '../../utils/odAuthTokenStore'
 import { runCorsMiddleware } from './raw'
 
 const basePath = pathPosix.resolve('/', siteConfig.baseDirectory)
 const clientId = apiConfig.clientId
 const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
+
+function isConfiguredSiteOwner(userPrincipalName: unknown): boolean {
+  return (
+    typeof userPrincipalName === 'string' &&
+    typeof siteConfig.userPrincipalName === 'string' &&
+    userPrincipalName.toLowerCase() === siteConfig.userPrincipalName.toLowerCase()
+  )
+}
 
 /**
  * Encode the path of the file relative to the base directory
@@ -34,11 +42,11 @@ export function encodePath(path: string): string {
  *
  * @returns Access token for OneDrive API
  */
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken(forceRefresh = false): Promise<string> {
   const { accessToken, refreshToken } = await getOdAuthTokens()
 
   // Return in storage access token if it is still valid
-  if (typeof accessToken === 'string') {
+  if (!forceRefresh && typeof accessToken === 'string') {
     console.log('Fetch access token from storage.')
     return accessToken
   }
@@ -57,21 +65,30 @@ export async function getAccessToken(): Promise<string> {
   body.append('refresh_token', refreshToken)
   body.append('grant_type', 'refresh_token')
 
-  const resp = await axios.post(apiConfig.authApi, body, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  })
-
-  if ('access_token' in resp.data && 'refresh_token' in resp.data) {
-    const { expires_in, access_token, refresh_token } = resp.data
-    await storeOdAuthTokens({
-      accessToken: access_token,
-      accessTokenExpiry: parseInt(expires_in),
-      refreshToken: refresh_token,
+  try {
+    const resp = await axios.post(apiConfig.authApi, body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
     })
-    console.log('Fetch new access token with stored refresh token.')
-    return access_token
+
+    if ('access_token' in resp.data && 'refresh_token' in resp.data) {
+      const { expires_in, access_token, refresh_token } = resp.data
+      await storeOdAuthTokens({
+        accessToken: access_token,
+        accessTokenExpiry: parseInt(expires_in),
+        refreshToken: refresh_token,
+      })
+      console.log('Fetch new access token with stored refresh token.')
+      return access_token
+    }
+  } catch (error: any) {
+    const refreshError = error?.response?.data?.error
+    if (refreshError === 'invalid_grant') {
+      await clearOdAuthTokens()
+    }
+    console.error('Failed to refresh access token.', error?.response?.data ?? error)
+    return ''
   }
 
   return ''
@@ -160,17 +177,46 @@ export async function checkAuthRoute(
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // If method is POST, then the API is called by the client to store acquired tokens
   if (req.method === 'POST') {
-    const { obfuscatedAccessToken, accessTokenExpiry, obfuscatedRefreshToken } = req.body
-    const accessToken = revealObfuscatedToken(obfuscatedAccessToken)
-    const refreshToken = revealObfuscatedToken(obfuscatedRefreshToken)
+    const { accessToken, accessTokenExpiry, refreshToken } = req.body ?? {}
+    const parsedExpiry = Number(accessTokenExpiry)
 
-    if (typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
+    if (
+      typeof accessToken !== 'string' ||
+      typeof refreshToken !== 'string' ||
+      !Number.isFinite(parsedExpiry) ||
+      parsedExpiry <= 0
+    ) {
       res.status(400).send('Invalid request body')
       return
     }
 
-    await storeOdAuthTokens({ accessToken, accessTokenExpiry, refreshToken })
-    res.status(200).send('OK')
+    if (!siteConfig.userPrincipalName) {
+      res.status(500).json({ error: 'Site owner is not configured.' })
+      return
+    }
+
+    try {
+      const { data } = await getAuthPersonInfo(accessToken)
+      if (!isConfiguredSiteOwner(data?.userPrincipalName)) {
+        res.status(403).json({ error: 'Authenticated user does not match the configured site owner.' })
+        return
+      }
+
+      await storeOdAuthTokens({
+        accessToken,
+        accessTokenExpiry: Math.floor(parsedExpiry),
+        refreshToken,
+      })
+      res.status(200).send('OK')
+    } catch (error: any) {
+      const status = error?.response?.status
+      if (status === 401 || status === 403) {
+        res.status(403).json({ error: 'Failed to validate the authenticated user.' })
+        return
+      }
+
+      res.status(status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
+    }
     return
   }
 
@@ -287,7 +333,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({ file: identityData })
     return
   } catch (error: any) {
-    res.status(error?.response?.code ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
+    res.status(error?.response?.status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
     return
   }
 }

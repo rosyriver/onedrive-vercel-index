@@ -5,17 +5,14 @@ import { useTranslation, Trans } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import siteConfig from '../../../config/site.config'
-import apiConfig from '../../../config/api.config'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getAccessToken } from '../api'
 
 export async function getServerSideProps({ locale }) {
-  const clientId = apiConfig.clientId;
-  const clientSecret = apiConfig.obfuscatedClientSecret;
-  // Get accessToken using getAccessToken function
-  const accessToken = await getAccessToken();
+  const { default: apiConfig } = await import('../../../config/api.config')
+  const accessToken = await getAccessToken()
   // If the accessToken exists, redirect to the home page
   if (accessToken) {
     return {
@@ -29,13 +26,17 @@ export async function getServerSideProps({ locale }) {
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common'])),
-      clientId,
-      clientSecret,
+      clientId: apiConfig.clientId,
+      clientSecretConfigured: apiConfig.obfuscatedClientSecret !== '',
+      redirectUri: apiConfig.redirectUri,
+      authApi: apiConfig.authApi,
+      driveApi: apiConfig.driveApi,
+      scope: apiConfig.scope,
     },
   }
 }
 
-export default function OAuthStep1({ clientId, clientSecret }) {
+export default function OAuthStep1({ clientId, clientSecretConfigured, redirectUri, authApi, driveApi, scope }) {
   const router = useRouter()
 
   const { t } = useTranslation()
@@ -106,7 +107,7 @@ export default function OAuthStep1({ clientId, clientSecret }) {
                       CLIENT_SECRET*
                     </td>
                     <td className="whitespace-nowrap py-1 px-3 text-gray-500 dark:text-gray-400">
-                      <code className="font-mono text-sm">{clientSecret}</code>
+                      <code className="font-mono text-sm">{clientSecretConfigured ? 'Configured on server' : 'Missing'}</code>
                     </td>
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -114,7 +115,7 @@ export default function OAuthStep1({ clientId, clientSecret }) {
                       REDIRECT_URI
                     </td>
                     <td className="whitespace-nowrap py-1 px-3 text-gray-500 dark:text-gray-400">
-                      <code className="font-mono text-sm">{apiConfig.redirectUri}</code>
+                      <code className="font-mono text-sm">{redirectUri}</code>
                     </td>
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -122,7 +123,7 @@ export default function OAuthStep1({ clientId, clientSecret }) {
                       Auth API URL
                     </td>
                     <td className="whitespace-nowrap py-1 px-3 text-gray-500 dark:text-gray-400">
-                      <code className="font-mono text-sm">{apiConfig.authApi}</code>
+                      <code className="font-mono text-sm">{authApi}</code>
                     </td>
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -130,7 +131,7 @@ export default function OAuthStep1({ clientId, clientSecret }) {
                       Drive API URL
                     </td>
                     <td className="whitespace-nowrap py-1 px-3 text-gray-500 dark:text-gray-400">
-                      <code className="font-mono text-sm">{apiConfig.driveApi}</code>
+                      <code className="font-mono text-sm">{driveApi}</code>
                     </td>
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -138,7 +139,7 @@ export default function OAuthStep1({ clientId, clientSecret }) {
                       API Scope
                     </td>
                     <td className="whitespace-nowrap py-1 px-3 text-gray-500 dark:text-gray-400">
-                      <code className="font-mono text-sm">{apiConfig.scope}</code>
+                      <code className="font-mono text-sm">{scope}</code>
                     </td>
                   </tr>
                 </tbody>

@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation, Trans } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -10,12 +10,13 @@ import siteConfig from '../../../config/site.config'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import { LoadingIcon } from '../../components/Loading'
-import { extractAuthCodeFromRedirected, generateAuthorisationUrl } from '../../utils/oAuthHandler'
+import { extractAuthCodeFromRedirected } from '../../utils/oAuthClient'
 import { getAccessToken } from '../api'
 
 export async function getServerSideProps({ locale }) {
-  // Get accessToken using getAccessToken function
-  const accessToken = await getAccessToken();
+  const { default: apiConfig } = await import('../../../config/api.config')
+  const { generateAuthorisationUrl } = await import('../../utils/oAuthHandler')
+  const accessToken = await getAccessToken()
   // If the accessToken exists, redirect to the home page
   if (accessToken) {
     return {
@@ -29,11 +30,13 @@ export async function getServerSideProps({ locale }) {
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common'])),
+      oAuthUrl: generateAuthorisationUrl(apiConfig.clientId),
+      redirectUri: apiConfig.redirectUri,
     },
   }
 }
 
-export default function OAuthStep2() {
+export default function OAuthStep2({ oAuthUrl, redirectUri }) {
   const router = useRouter()
 
   const [oAuthRedirectedUrl, setOAuthRedirectedUrl] = useState('')
@@ -41,14 +44,6 @@ export default function OAuthStep2() {
   const [buttonLoading, setButtonLoading] = useState(false)
 
   const { t } = useTranslation()
-
-  // const oAuthUrl = generateAuthorisationUrl()
-
-  const [oAuthUrl, setOAuthUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    generateAuthorisationUrl().then(url => setOAuthUrl(url))
-  }, [])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-gray-900">
@@ -86,9 +81,7 @@ export default function OAuthStep2() {
             <div
               className="relative my-2 cursor-pointer rounded-sm border border-gray-500/50 bg-gray-50 font-mono text-sm hover:opacity-80 dark:bg-gray-800"
               onClick={() => {
-                if (oAuthUrl) {
-                  window.open(oAuthUrl)
-                }
+                window.open(oAuthUrl)
               }}
             >
               <div className="absolute top-0 right-0 p-1 opacity-60">
@@ -126,7 +119,7 @@ export default function OAuthStep2() {
               value={oAuthRedirectedUrl}
               onChange={e => {
                 setOAuthRedirectedUrl(e.target.value)
-                setAuthCode(extractAuthCodeFromRedirected(e.target.value))
+                setAuthCode(extractAuthCodeFromRedirected(e.target.value, redirectUri))
               }}
             />
 
