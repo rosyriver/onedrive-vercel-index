@@ -4,6 +4,7 @@
     },
     "buildCommand": "pnpm build",
     "installCommand": "pnpm install",
+    "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':!*.md'",
     "crons": [
         {
             "path": "/api/refresh-auth",
