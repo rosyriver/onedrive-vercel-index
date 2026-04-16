@@ -3,12 +3,20 @@ import CryptoJS from 'crypto-js'
 
 import apiConfig from '../../config/api.config'
 
-// The Microsoft client secret is stored as an obfuscated value in the environment.
-// Only the server should ever decode it.
+// The Microsoft client secret is read on the server only. Keep supporting the
+// legacy obfuscated value, but allow Vercel to store the raw Azure secret too.
 const AES_SECRET_KEY = 'onedrive-vercel-index'
-export function revealObfuscatedToken(obfuscated: string): string {
-  const decrypted = CryptoJS.AES.decrypt(obfuscated, AES_SECRET_KEY)
-  return decrypted.toString(CryptoJS.enc.Utf8)
+export function revealObfuscatedToken(secret: string): string {
+  if (!secret) {
+    return ''
+  }
+
+  try {
+    const decrypted = CryptoJS.AES.decrypt(secret, AES_SECRET_KEY).toString(CryptoJS.enc.Utf8)
+    return decrypted || secret
+  } catch {
+    return secret
+  }
 }
 
 export function generateAuthorisationUrl(clientId: string): string {

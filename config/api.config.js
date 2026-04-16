@@ -8,9 +8,9 @@
  *   In which case you would need to change directLinkRegex.
  */
 module.exports = {
-  // The clientId and clientSecret are used to authenticate the user with Microsoft Graph API using OAuth. You would
-  // not need to change anything here if you can authenticate with your personal Microsoft account with OneDrive International.
-  // You MUST add CLIEND_ID & SECRET_KEY in YOUT Vercel Project's Setting: Environment Variables (Key & Value)
+  // The clientId and clientSecret are used to authenticate the user with Microsoft Graph API using OAuth.
+  // Set CLIENT_ID and SECRET_KEY in your Vercel Project's Environment Variables. SECRET_KEY can be the
+  // raw Azure client secret value; legacy obfuscated values are still supported.
   clientId: process.env.CLIENT_ID  || '',
   obfuscatedClientSecret: process.env.SECRET_KEY  || '',
 
