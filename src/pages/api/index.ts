@@ -8,6 +8,8 @@ import siteConfig from '../../../config/site.config'
 import { getAuthPersonInfo, revealObfuscatedToken } from '../../utils/oAuthHandler'
 import { compareHashedToken } from '../../utils/protectedRouteHandler'
 import { clearOdAuthTokens, getOdAuthTokens, storeOdAuthTokens } from '../../utils/odAuthTokenStore'
+import { authErrorDetails, type AuthSource } from '../../utils/authDiagnostics'
+import { recordAuthEvent } from '../../utils/odAuthDiagnostics'
 import { runCorsMiddleware } from './raw'
 
 const basePath = pathPosix.resolve('/', siteConfig.baseDirectory)
@@ -42,8 +44,15 @@ export function encodePath(path: string): string {
  *
  * @returns Access token for OneDrive API
  */
-export async function getAccessToken(forceRefresh = false): Promise<string> {
-  const { accessToken, refreshToken } = await getOdAuthTokens()
+export async function getAccessToken(forceRefresh = false, source: AuthSource = 'request'): Promise<string> {
+  let tokens: Awaited<ReturnType<typeof getOdAuthTokens>>
+  try {
+    tokens = await getOdAuthTokens()
+  } catch (error) {
+    await recordAuthEvent({ kind: 'token_store_failed', source, phase: 'token_read', error })
+    throw error
+  }
+  const { accessToken, refreshToken } = tokens
 
   // Return in storage access token if it is still valid
   if (!forceRefresh && typeof accessToken === 'string') {
@@ -54,6 +63,11 @@ export async function getAccessToken(forceRefresh = false): Promise<string> {
   // Return empty string if no refresh token is stored, which requires the application to be re-authenticated
   if (typeof refreshToken !== 'string') {
     console.log('No refresh token, return empty access token.')
+    // A broken public link may be visited thousands of times. Only the daily job
+    // records this observation; ordinary missing-token requests do no diagnostic I/O.
+    if (source === 'cron') {
+      await recordAuthEvent({ kind: 'refresh_token_missing', source, phase: 'token_read' })
+    }
     return ''
   }
 
@@ -65,6 +79,7 @@ export async function getAccessToken(forceRefresh = false): Promise<string> {
   body.append('refresh_token', refreshToken)
   body.append('grant_type', 'refresh_token')
 
+  let phase: 'token_refresh' | 'token_write' = 'token_refresh'
   try {
     const resp = await axios.post(apiConfig.authApi, body, {
       headers: {
@@ -74,20 +89,34 @@ export async function getAccessToken(forceRefresh = false): Promise<string> {
 
     if ('access_token' in resp.data && 'refresh_token' in resp.data) {
       const { expires_in, access_token, refresh_token } = resp.data
+      phase = 'token_write'
       await storeOdAuthTokens({
         accessToken: access_token,
         accessTokenExpiry: parseInt(expires_in),
         refreshToken: refresh_token,
       })
+      await recordAuthEvent({ kind: 'refresh_succeeded', source })
       console.log('Fetch new access token with stored refresh token.')
       return access_token
     }
+    await recordAuthEvent({ kind: 'refresh_failed', source, phase })
   } catch (error: any) {
-    const refreshError = error?.response?.data?.error
-    if (refreshError === 'invalid_grant') {
-      await clearOdAuthTokens()
+    await recordAuthEvent({
+      kind: phase === 'token_write' ? 'token_store_failed' : 'refresh_failed',
+      source,
+      phase,
+      error,
+    })
+    if (phase === 'token_refresh' && error?.response?.data?.error === 'invalid_grant') {
+      try {
+        await clearOdAuthTokens()
+        await recordAuthEvent({ kind: 'tokens_cleared', source, phase: 'token_clear', error })
+      } catch (clearError) {
+        await recordAuthEvent({ kind: 'token_store_failed', source, phase: 'token_clear', error: clearError })
+        throw clearError
+      }
     }
-    console.error('Failed to refresh access token.', error?.response?.data ?? error)
+    console.error('Failed to refresh access token.', { phase, ...authErrorDetails(error) })
     return ''
   }
 
@@ -132,7 +161,7 @@ export function getAuthTokenPath(path: string) {
 export async function checkAuthRoute(
   cleanPath: string,
   accessToken: string,
-  odTokenHeader: string
+  odTokenHeader: string,
 ): Promise<{ code: 200 | 401 | 404 | 500; message: string }> {
   // Handle authentication through .password
   const authTokenPath = getAuthTokenPath(cleanPath)
@@ -207,6 +236,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         accessTokenExpiry: Math.floor(parsedExpiry),
         refreshToken,
       })
+      await recordAuthEvent({ kind: 'tokens_saved', source: 'authorization' })
       res.status(200).send('OK')
     } catch (error: any) {
       const status = error?.response?.status

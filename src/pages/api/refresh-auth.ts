@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return
   }
 
-  const accessToken = await getAccessToken(true)
+  const accessToken = await getAccessToken(true, 'cron')
   if (!accessToken) {
     res.status(409).json({ error: 'Re-authentication required.' })
     return

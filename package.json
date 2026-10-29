@@ -7,6 +7,7 @@
     "node": "22.x"
   },
   "scripts": {
+    "test:auth": "node --test tests/auth-diagnostics.test.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -73,6 +74,7 @@
     "eslint-config-prettier": "^10.1.8",
     "i18next": "^25.5.2",
     "i18next-parser": "^9.3.0",
+    "ioredis-mock": "8.13.1",
     "next": "15.5.9",
     "next-i18next": "^15.4.2",
     "postcss": "8.5.6",
